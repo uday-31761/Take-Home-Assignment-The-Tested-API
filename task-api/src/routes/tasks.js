@@ -50,6 +50,37 @@ router.put('/:id', (req, res) => {
 
   res.json(task);
 });
+router.patch('/:id/assign', (req, res) => {
+  const { assignee } = req.body;
+
+  if (
+    typeof assignee !== 'string' ||
+    assignee.trim() === ''
+  ) {
+    return res.status(400).json({
+      error: 'assignee must be a non-empty string',
+    });
+  }
+
+  const task = taskService.assignTask(
+    req.params.id,
+    assignee
+  );
+
+  if (!task) {
+    return res.status(404).json({
+      error: 'Task not found',
+    });
+  }
+
+  if (task.alreadyAssigned) {
+    return res.status(400).json({
+      error: 'Task is already assigned',
+    });
+  }
+
+  res.json(task);
+});
 
 router.delete('/:id', (req, res) => {
   const deleted = taskService.remove(req.params.id);
