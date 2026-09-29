@@ -1,113 +1,147 @@
-# Take-Home Assignment — The Untested API
+# Task Manager API — Take-Home Assignment
 
-A 2-day take-home assignment. You'll read unfamiliar code, write tests, track down bugs, and ship a small feature.
+A RESTful Task Manager API built with Node.js and Express, with automated unit and integration tests using Jest and Supertest.
 
-Read **[ASSIGNMENT.md](./ASSIGNMENT.md)** for the full brief before you start.
+## Features
 
----
+- Create tasks
+- Retrieve all tasks
+- Retrieve tasks by status
+- Pagination
+- Update tasks
+- Delete tasks
+- Complete tasks
+- Assign tasks to users
+- Task statistics
+- Input validation
+- Error handling
+- Unit testing
+- Integration testing
+- Code coverage
 
-## A note on AI tools
+## Tech Stack
 
-You're welcome to use AI tools. What we're evaluating is your ability to read and reason about unfamiliar code — so your submission should reflect your own understanding, not just generated output.
+- Node.js
+- Express.js
+- Jest
+- Supertest
+- UUID
 
-Concretely:
-- For each bug you report: include where in the code it lives and why it happens
-- For the feature you implement: briefly explain the design decisions you made
-- If something surprised you or you had to make a tradeoff, say so
+## API Endpoints
 
----
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/tasks` | Get all tasks |
+| GET | `/tasks?status=todo` | Get tasks by status |
+| GET | `/tasks?page=1&limit=10` | Get paginated tasks |
+| GET | `/tasks/stats` | Get task statistics |
+| POST | `/tasks` | Create a new task |
+| PUT | `/tasks/:id` | Update a task |
+| DELETE | `/tasks/:id` | Delete a task |
+| PATCH | `/tasks/:id/complete` | Mark a task as completed |
+| PATCH | `/tasks/:id/assign` | Assign a task to a user |
 
-## Getting Started
+## Task Statuses
 
-**Prerequisites:** Node.js 18+
+The API supports the following task statuses:
 
-```bash
-cd task-api
-npm install
-npm start        # runs on http://localhost:3000
-```
+- `todo`
+- `in_progress`
+- `done`
 
-**Tests:**
+## Task Priorities
 
-```bash
-npm test           # run test suite
-npm run coverage   # run with coverage report
-```
+The API supports:
 
----
+- `low`
+- `medium`
+- `high`
 
-## Project Structure
+## Example: Create Task
 
-```
-task-api/
-  src/
-    app.js                  # Express app setup
-    routes/tasks.js         # Route handlers
-    services/taskService.js # Business logic + in-memory data store
-    utils/validators.js     # Input validation helpers
-  tests/                    # Your tests go here
-  package.json
-  jest.config.js
-ASSIGNMENT.md               # Full brief — read this first
-```
+```http
+POST /tasks
+Content-Type: application/json
 
-> The data store is in-memory. It resets every time the server restarts.
 
----
-
-## API Reference
-
-| Method   | Path                      | Description                              |
-|----------|---------------------------|------------------------------------------|
-| `GET`    | `/tasks`                  | List all tasks. Supports `?status=`, `?page=`, `?limit=` |
-| `POST`   | `/tasks`                  | Create a new task                        |
-| `PUT`    | `/tasks/:id`              | Full update of a task                    |
-| `DELETE` | `/tasks/:id`              | Delete a task (returns 204)              |
-| `PATCH`  | `/tasks/:id/complete`     | Mark a task as complete                  |
-| `GET`    | `/tasks/stats`            | Counts by status + overdue count         |
-| `PATCH`  | `/tasks/:id/assign`       | **Assign a task to a user** _(to implement)_ |
-
-### Task shape
-
-```json
 {
-  "id": "uuid",
-  "title": "string",
-  "description": "string",
-  "status": "pending | in-progress | completed",
-  "priority": "low | medium | high",
-  "dueDate": "ISO 8601 or null",
-  "completedAt": "ISO 8601 or null",
-  "createdAt": "ISO 8601"
+  "title": "Complete assignment",
+  "description": "Finish the take-home assignment",
+  "priority": "high"
 }
-```
 
-### Sample requests
+Example: Assign Task
+PATCH /tasks/:id/assign
+Content-Type: application/json
 
-**Create a task**
-```bash
-curl -X POST http://localhost:3000/tasks \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Write tests", "priority": "high"}'
-```
+{
+  "assignee": "Uday"
+}
 
-**List tasks with filter**
-```bash
-curl "http://localhost:3000/tasks?status=pending&page=1&limit=10"
-```
+A task that has already been assigned cannot be reassigned.
+Testing
+The project includes:
+- Unit tests for taskService.js
+- Integration tests for API routes using Supertest
+- Validation tests
+- Edge-case testing
+Run the test suite:
+npm test
 
-**Mark complete**
-```bash
-curl -X PATCH http://localhost:3000/tasks/<id>/complete
-```
+Run tests with coverage:
+npm run coverage
 
----
+Test Results
+Current test suite:
+- 3 test suites passed
+- 49 tests passed
+- 0 failed
+Coverage:
+- Statements: 96.12%
+- Branches: 91.95%
+- Functions: 93.10%
+- Lines: 95.74%
+Project Structure
+task-api/
+├── src/
+│   ├── app.js
+│   ├── routes/
+│   │   └── tasks.js
+│   ├── services/
+│   │   └── taskService.js
+│   └── utils/
+│       └── validators.js
+├── tests/
+│   ├── taskService.test.js
+│   ├── tasks.routes.test.js
+│   └── validators.test.js
+├── BUGS.md
+├── ASSIGNMENT-NOTES.md
+├── jest.config.js
+├── package.json
+└── README.md
 
-## What to Submit
-
-See [ASSIGNMENT.md](./ASSIGNMENT.md) for full submission requirements. At minimum, include:
-
-- **Test files** — covering the endpoints and edge cases you identified
-- **Bug report** — what you found, where in the code, and why it's a bug (not just symptoms)
-- **At least one fix** — with a note on your approach
-- **`PATCH /tasks/:id/assign` implementation** — plus a short explanation of any design decisions (validation, edge cases, etc.)
+Bugs Identified and Fixed
+During testing and code review, the following issues were identified:
+1. Pagination used an incorrect offset calculation.
+2. Completing a task unexpectedly changed its priority to medium.
+3. Status filtering uses partial string matching instead of exact matching.
+The first two issues were fixed and covered by tests. The status filtering behavior is documented as a potential improvement.
+Design Decisions
+- Task assignment requires a non-empty string.
+- Assignment values are trimmed before storing.
+- Assigning a non-existent task returns 404.
+- Reassigning an already assigned task returns 400.
+- Invalid task input returns 400.
+- Missing tasks return 404.
+Production Considerations
+For a production system, I would consider:
+- Persistent database storage
+- Authentication and authorization
+- Structured logging
+- API rate limiting
+- Request validation middleware
+- Database transactions
+- API documentation using OpenAPI/Swagger
+- Monitoring and health checks
+- More comprehensive security testing
